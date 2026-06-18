@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Britain — DSP Prague</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #080808;
+  --off: #0d0d0d;
+  --surface: #111;
+  --border: #1a1a1a;
+  --border-mid: #232323;
+  --text: #ece8e0;
+  --dim: rgba(236,232,224,0.5);
+  --muted: rgba(236,232,224,0.22);
+  --gold: #c8a84b;
+  --red: #9e1c2e;
+  --blue: #0a1f5c;
+  --white-flag: rgba(240,236,228,0.07);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  font-weight: 300;
+  min-height: 88vh;
+  overflow-x: hidden;
+}
+
+/* ── GRAIN ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* ══════════════════════
+   HERO — Union Jack as geometry, not decoration
+══════════════════════ */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 0 72px;
+  overflow: hidden;
+}
+
+/* Flag geometry — SVG positioned as pure visual field */
+.flag-field {
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+}
+
+.flag-field svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Diagonal tension lines — the crosses of the flag as composition */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom right, transparent calc(50% - 1px), rgba(207,20,43,0.12) calc(50% - 1px), rgba(207,20,43,0.12) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to bottom left, transparent calc(50% - 1px), rgba(207,20,43,0.12) calc(50% - 1px), rgba(207,20,43,0.12) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to bottom, transparent calc(50% - 2px), rgba(255,255,255,0.04) calc(50% - 2px), rgba(255,255,255,0.04) calc(50% + 2px), transparent calc(50% + 2px)),
+    linear-gradient(to right, transparent calc(50% - 2px), rgba(255,255,255,0.04) calc(50% - 2px), rgba(255,255,255,0.04) calc(50% + 2px), transparent calc(50% + 2px));
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  padding: 0 10vw;
+}
+
+.hero-overline {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(236,232,224,0.35);
+  margin-bottom: 20px;
+}
+
+.hero-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(72px, 20vw, 240px);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.04em;
+  line-height: 0.85;
+  color: var(--text);
+  margin-bottom: 40px;
+}
+
+.hero-title span {
+  display: block;
+}
+
+.hero-sub {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(18px, 2.5vw, 30px);
+  font-weight: 400;
+  font-style: italic;
+  color: rgba(236,232,224,0.82);
+  max-width: 580px;
+  line-height: 1.5;
+  margin-bottom: 48px;
+}
+
+.hero-question {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.8;
+}
+
+/* scroll indicator */
+.scroll-cue {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ══════════════════════
+   STRAND STATEMENT
+══════════════════════ */
+.strand-statement {
+  padding: 80px 10vw;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.strand-q {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 3.5vw, 48px);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.15;
+}
+
+.strand-q em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.strand-body {
+  font-size: 15px;
+  color: var(--dim);
+  line-height: 1.85;
+}
+
+.strand-body p + p { margin-top: 14px; }
+.strand-body strong { color: var(--text); font-weight: 400; }
+
+/* ══════════════════════
+   INSTRUMENT GRID
+══════════════════════ */
+.instruments-section {
+  padding: 72px 10vw 80px;
+}
+
+.section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 48px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.instrument-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+
+/* Each instrument card */
+.instrument {
+  background: var(--surface);
+  padding: 36px 32px 32px;
+  position: relative;
+  text-decoration: none;
+  display: block;
+  transition: background 0.2s;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.instrument::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--instrument-color, var(--gold));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.instrument:hover { background: #161616; }
+.instrument:hover::before { transform: scaleX(1); }
+
+/* Instrument number — large ghost */
+.instrument-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 72px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.04);
+  line-height: 1;
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  letter-spacing: -0.03em;
+  pointer-events: none;
+}
+
+.instrument-type {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--instrument-color, var(--gold));
+  margin-bottom: 14px;
+  opacity: 0.8;
+}
+
+.instrument-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(18px, 2vw, 26px);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.15;
+  margin-bottom: 14px;
+}
+
+.instrument-question {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--dim);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.instrument-method {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.instrument-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--border-mid);
+  color: var(--muted);
+  padding: 4px 9px;
+}
+
+/* Spine instrument — Museum is Not Neutral — full width, different treatment */
+.instrument.spine {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 40px;
+  padding: 40px 40px;
+}
+
+.spine-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 120px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.04);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.spine-body { }
+
+.spine-cta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+/* Instrument coming soon state */
+.instrument.soon {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.instrument.soon .instrument-title::after {
+  content: ' — coming';
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-style: normal;
+}
+
+/* ══════════════════════
+   THROUGH-LINE
+══════════════════════ */
+.through-line {
+  padding: 72px 10vw;
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0;
+}
+
+.tl-item {
+  padding: 24px 20px;
+  border-right: 1px solid var(--border);
+  position: relative;
+}
+
+.tl-item:last-child { border-right: none; }
+
+.tl-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.tl-q {
+  font-family: 'Playfair Display', serif;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--dim);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.tl-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tl-arrow {
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--border-mid);
+  z-index: 1;
+}
+
+/* ══════════════════════
+   FOOTER
+══════════════════════ */
+.hub-footer {
+  padding: 40px 10vw;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ══════════════════════
+   RESPONSIVE
+══════════════════════ */
+@media (max-width: 900px) {
+  .instrument-grid { grid-template-columns: 1fr 1fr; }
+  .instrument.spine { grid-template-columns: 1fr; gap: 16px; }
+  .spine-num { display: none; }
+  .through-line { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .strand-statement { grid-template-columns: 1fr; gap: 32px; }
+  .instrument-grid { grid-template-columns: 1fr; }
+  .through-line { grid-template-columns: repeat(2, 1fr); }
+  .hero-title { font-size: clamp(64px, 18vw, 100px); }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="flag-field">
+    <svg viewBox="0 0 60 30" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <rect width="60" height="30" fill="#00247D" opacity="0.6"/>
+      <line x1="0" y1="0" x2="60" y2="30" stroke="white" stroke-width="6" opacity="0.5"/>
+      <line x1="60" y1="0" x2="0" y2="30" stroke="white" stroke-width="6" opacity="0.5"/>
+      <line x1="0" y1="0" x2="60" y2="30" stroke="#CF142B" stroke-width="2.5"/>
+      <line x1="60" y1="0" x2="0" y2="30" stroke="#CF142B" stroke-width="2.5"/>
+      <rect x="24" y="0" width="12" height="30" fill="white" opacity="0.7"/>
+      <rect x="0" y="12" width="60" height="6" fill="white" opacity="0.7"/>
+      <rect x="26" y="0" width="8" height="30" fill="#CF142B"/>
+      <rect x="0" y="13" width="60" height="4" fill="#CF142B"/>
+    </svg>
+  </div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <p class="hero-overline">DSP Prague · Themenfeld 3 · Politics, Culture, Society · Jahrgangsstufe 11/12</p>
+    <h1 class="hero-title">
+      <span>Britain</span>
+    </h1>
+    <div style="width: 40px; height: 1px; background: rgba(207,20,43,0.6); margin: 0 0 32px;"></div>
+    <p class="hero-sub">How national stories get made — and who gets to make them.</p>
+    <p class="hero-question">Identity · Power · Memory · Narrative · Culture</p>
+  </div>
+  <div class="scroll-cue">↓ Scroll</div>
+</section>
+
+<!-- ══ STRAND STATEMENT ══ -->
+<section class="strand-statement">
+  <h2 class="strand-q">This strand is not about Britain.<br><em>It's about how stories become nations.</em></h2>
+  <div class="strand-body">
+    <p>Seven instruments, moving from the contemporary to the historical and back. Each one uses a different object — political language, music, newspapers, empire, myth, archives — to ask the same question.</p>
+    <p>Students who complete this strand aren't just prepared to discuss Britain. They're equipped to interrogate any national narrative. That's the real claim. Looking at the instruments, it's a defensible one.</p>
+    <p>The strand also asks where its own framework fails. Narrative analysis can overemphasise construction and underemphasise contingency — the moments when the story could have gone differently. The instruments don't resolve that tension. They hold it open.</p>
+  </div>
+</section>
+
+<!-- ══ INSTRUMENTS ══ -->
+<section class="instruments-section">
+  <div class="section-label">The instruments — seven</div>
+
+  <div class="instrument-grid">
+
+    <!-- 1. Who Gets to Leave? -->
+    <a class="instrument" href="https://justinsteinmetz.github.io/WhoGetsToLeave/" style="--instrument-color: #5a8a6a;">
+      <div class="instrument-num">01</div>
+      <div class="instrument-type">Epistemological</div>
+      <div class="instrument-title">Who Gets to Leave?</div>
+      <div class="instrument-question">"Why does the same word — sovereignty — mean opposite things to different people?"</div>
+      <div class="instrument-method">Method: sovereignty language analysis · four cases</div>
+      <div class="instrument-tags">
+        <span class="tag">Brexit</span>
+        <span class="tag">Scotland</span>
+        <span class="tag">Catalonia</span>
+        <span class="tag">Ireland</span>
+      </div>
+    </a>
+
+    <!-- 2. British Invasion -->
+    <a class="instrument" href="https://justinsteinmetz.github.io/BritishInvasion/" style="--instrument-color: #8a6a4a;">
+      <div class="instrument-num">02</div>
+      <div class="instrument-type">Epistemological</div>
+      <div class="instrument-title">British Invasion</div>
+      <div class="instrument-question">"If British music is built from elsewhere — what makes it British?"</div>
+      <div class="instrument-method">Method: thread-pulling · three acts · four traditions</div>
+      <div class="instrument-tags">
+        <span class="tag">Wham!</span>
+        <span class="tag">The Beatles</span>
+        <span class="tag">Adele</span>
+        <span class="tag">Blues · Soul · Gospel</span>
+      </div>
+    </a>
+
+    <!-- 3. Whose Story Is This? -->
+    <a class="instrument" href="https://justinsteinmetz.github.io/WhoseStoryIsThis/" style="--instrument-color: #7a4a4a;">
+      <div class="instrument-num">03</div>
+      <div class="instrument-type">Framing</div>
+      <div class="instrument-title">Whose Story Is This?</div>
+      <div class="instrument-question">"When history is written — whose story survives?"</div>
+      <div class="instrument-method">Method: seven accounts · hidden labels · narrative reveal</div>
+      <div class="instrument-tags">
+        <span class="tag">Windrush</span>
+        <span class="tag">Framing</span>
+        <span class="tag">BBC</span>
+        <span class="tag">Seven papers</span>
+      </div>
+    </a>
+
+    <!-- 4. Bassline Britain -->
+    <a class="instrument" href="https://justinsteinmetz.github.io/BasslineBritain/" style="--instrument-color: #c8a84b;">
+      <div class="instrument-num">04</div>
+      <div class="instrument-type">Discovery</div>
+      <div class="instrument-title">Bassline Britain</div>
+      <div class="instrument-question">"Why do some cultures become visible only after they've already done the work?"</div>
+      <div class="instrument-method">Method: infrastructure reveal · prediction confrontation</div>
+      <div class="instrument-tags">
+        <span class="tag">UK Jazz</span>
+        <span class="tag">Tomorrow's Warriors</span>
+        <span class="tag">Steam Down</span>
+        <span class="tag">Marmot</span>
+      </div>
+    </a>
+
+    <!-- 4. How British Is It? -->
+    <a class="instrument" href="https://justinsteinmetz.github.io/HowBritishIsIt/" style="--instrument-color: #6a4a8a;">
+      <div class="instrument-num">05</div>
+      <div class="instrument-type">Discovery</div>
+      <div class="instrument-title">How British Is It?</div>
+      <div class="instrument-question">"Why does empire keep appearing — even in things that seem entirely domestic?"</div>
+      <div class="instrument-method">Method: spectrum rating · density reveal · Union Jack</div>
+      <div class="instrument-tags">
+        <span class="tag">Empire</span>
+        <span class="tag">Sanghera</span>
+        <span class="tag">12 items</span>
+        <span class="tag">Amnesia</span>
+      </div>
+    </a>
+
+    <!-- 5. Who Invented England? -->
+    <a class="instrument" href="https://justinsteinmetz.github.io/WhoInventedEngland/" style="--instrument-color: #4a6a8a;">
+      <div class="instrument-num">06</div>
+      <div class="instrument-type">Epistemological</div>
+      <div class="instrument-title">Who Invented England?</div>
+      <div class="instrument-question">"Why do some political ideas feel timeless?"</div>
+      <div class="instrument-method">Method: undatable statements · five centuries of evidence</div>
+      <div class="instrument-tags">
+        <span class="tag">Dee 1577</span>
+        <span class="tag">Burke 1790</span>
+        <span class="tag">Thatcher 1988</span>
+        <span class="tag">Brexit</span>
+      </div>
+    </a>
+
+    <!-- 7. Who Gets to Keep It? — capstone, full width -->
+    <a class="instrument spine" href="https://justinsteinmetz.github.io/WhoGetsToKeepIt/" style="--instrument-color: #9e1c2e;">
+      <div class="spine-num">07</div>
+      <div class="spine-body">
+        <div class="instrument-type">Archive · Capstone</div>
+        <div class="instrument-title">Who Gets to Keep It?</div>
+        <div class="instrument-question">"If you control the evidence — do you control the story?"</div>
+        <div class="instrument-method">Method: object provenance · four cases · restitution arguments · Hicks</div>
+        <div class="instrument-tags">
+          <span class="tag">Benin Bronzes</span>
+          <span class="tag">Elgin Marbles</span>
+          <span class="tag">Koh-i-Noor</span>
+          <span class="tag">Rosetta Stone</span>
+        </div>
+      </div>
+      <div class="spine-cta">The strand ends here →</div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ══ THROUGH-LINE ══ -->
+<section class="through-line" style="grid-template-columns: repeat(7, 1fr);">
+  <div class="tl-item">
+    <div class="tl-num">01</div>
+    <div class="tl-q">Who writes the political story?</div>
+    <div class="tl-title">Who Gets to Leave?</div>
+    <div class="tl-arrow">→</div>
+  </div>
+  <div class="tl-item">
+    <div class="tl-num">02</div>
+    <div class="tl-q">How do cultural forms move?</div>
+    <div class="tl-title">British Invasion</div>
+    <div class="tl-arrow">→</div>
+  </div>
+  <div class="tl-item">
+    <div class="tl-num">03</div>
+    <div class="tl-q">Who decides what an event means?</div>
+    <div class="tl-title">Whose Story Is This?</div>
+    <div class="tl-arrow">→</div>
+  </div>
+  <div class="tl-item">
+    <div class="tl-num">04</div>
+    <div class="tl-q">How do ecosystems survive invisibility?</div>
+    <div class="tl-title">Bassline Britain</div>
+    <div class="tl-arrow">→</div>
+  </div>
+  <div class="tl-item">
+    <div class="tl-num">05</div>
+    <div class="tl-q">Who gets included in national identity?</div>
+    <div class="tl-title">How British Is It?</div>
+    <div class="tl-arrow">→</div>
+  </div>
+  <div class="tl-item">
+    <div class="tl-num">06</div>
+    <div class="tl-q">Who keeps reinventing the founding myth?</div>
+    <div class="tl-title">Who Invented England?</div>
+    <div class="tl-arrow">→</div>
+  </div>
+  <div class="tl-item">
+    <div class="tl-num">07</div>
+    <div class="tl-q">Who controls the physical archive?</div>
+    <div class="tl-title">Who Gets to Keep It?</div>
+  </div>
+</section>
+
+<!-- ══ WHAT THE INSTRUMENTS SHARE ══ -->
+<section style="padding: 72px 10vw; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 60px;">
+  <div>
+    <div class="section-label" style="margin-bottom: 32px;">What the instruments share</div>
+    <div style="display: flex; flex-direction: column; gap: 28px;">
+
+      <div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); opacity: 0.8; margin-bottom: 8px;">Principle 1 — Object before argument</div>
+        <div style="font-size: 14px; color: var(--dim); line-height: 1.75;">Students encounter a specific object — a political speech, a music industry map, a newspaper archive, a museum object — before any analytical claim is made. The argument emerges from the encounter rather than arriving as instruction.</div>
+      </div>
+
+      <div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); opacity: 0.8; margin-bottom: 8px;">Principle 2 — The same question, seven objects</div>
+        <div style="font-size: 14px; color: var(--dim); line-height: 1.75;">Every instrument returns to the same question from a different angle: who gets to tell the story, and what happens to everyone whose version doesn't survive? The repetition is structural, not accidental.</div>
+      </div>
+
+      <div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); opacity: 0.8; margin-bottom: 8px;">Principle 3 — What the framework misses</div>
+        <div style="font-size: 14px; color: var(--dim); line-height: 1.75;">The strand argues that national stories are constructed and contested. But the framework can overemphasise narrative and underemphasise contingency — the moments when the story didn't have to go the way it did. Ask this at each instrument: <em>what would the framework miss here?</em></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label" style="margin-bottom: 32px;">Threads across the instruments</div>
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+
+      <div style="padding: 16px 20px; border-left: 2px solid var(--border-mid);">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); opacity: 0.7; margin-bottom: 6px;">Who gets to tell it</div>
+        <div style="font-size: 13px; color: var(--dim); line-height: 1.65;">Who Gets to Leave?, Whose Story Is This?, and Who Gets to Keep It? all ask the same question at different scales — political, journalistic, archival.</div>
+      </div>
+
+      <div style="padding: 16px 20px; border-left: 2px solid var(--border-mid);">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); opacity: 0.7; margin-bottom: 6px;">Built from elsewhere</div>
+        <div style="font-size: 13px; color: var(--dim); line-height: 1.65;">British Invasion, Bassline Britain, and How British Is It? all examine the same mechanism: a culture claiming ownership of something it took from somewhere else.</div>
+      </div>
+
+      <div style="padding: 16px 20px; border-left: 2px solid var(--border-mid);">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); opacity: 0.7; margin-bottom: 6px;">Myth and time</div>
+        <div style="font-size: 13px; color: var(--dim); line-height: 1.65;">Who Invented England? and How British Is It? both ask how ideas and objects come to feel ancient when they are recent — and who benefits from that feeling.</div>
+      </div>
+
+      <div style="padding: 16px 20px; border-left: 2px solid var(--border-mid);">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); opacity: 0.7; margin-bottom: 6px;">The invisible infrastructure</div>
+        <div style="font-size: 13px; color: var(--dim); line-height: 1.65;">Bassline Britain and British Invasion both trace the gap between who built the culture and who got credited for it.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ RECOMMENDED SEQUENCE + ESSAY QUESTIONS ══ -->
+<section style="padding: 72px 10vw; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 60px;">
+
+  <div>
+    <div class="section-label" style="margin-bottom: 32px;">Recommended sequence</div>
+    <div style="display: flex; flex-direction: column; gap: 16px; font-size: 14px; color: var(--dim); line-height: 1.75;">
+      <p>Open with <strong style="color: var(--text); font-weight: 400;">Who Gets to Leave?</strong> — it establishes that language is contested before any historical material arrives.</p>
+      <p>Run <strong style="color: var(--text); font-weight: 400;">British Invasion</strong> and <strong style="color: var(--text); font-weight: 400;">Bassline Britain</strong> in sequence — both trace the same mechanism of cultural appropriation at different scales.</p>
+      <p>Place <strong style="color: var(--text); font-weight: 400;">Whose Story Is This?</strong> after the music instruments — students arrive already thinking about who gets credit.</p>
+      <p>Use <strong style="color: var(--text); font-weight: 400;">How British Is It?</strong> and <strong style="color: var(--text); font-weight: 400;">Who Invented England?</strong> as a pair — one contemporary, one historical, both about amnesia.</p>
+      <p>End with <strong style="color: var(--text); font-weight: 400;">Who Gets to Keep It?</strong> — it asks the strand's final question at the level of physical evidence. It is the hardest to argue your way out of.</p>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label" style="margin-bottom: 32px;">Abitur essay questions — Themenfeld 3</div>
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="padding: 16px 20px; border: 1px solid var(--border-mid); font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--dim); line-height: 1.65;">To what extent is national identity constructed rather than inherited?</div>
+      <div style="padding: 16px 20px; border: 1px solid var(--border-mid); font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--dim); line-height: 1.65;">How does control of historical narrative function as a form of political power?</div>
+      <div style="padding: 16px 20px; border: 1px solid var(--border-mid); font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--dim); line-height: 1.65;">To what extent does Britain's cultural identity depend on erasing the origins of what it claims as its own?</div>
+      <div style="padding: 16px 20px; border: 1px solid var(--border-mid); font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--dim); line-height: 1.65;">Should cultural objects be returned to the countries from which they were taken? On what grounds could this claim be resisted?</div>
+      <div style="padding: 16px 20px; border: 1px solid var(--border-mid); font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--dim); line-height: 1.65;">Is sovereignty a coherent concept — or does its meaning always depend on who is using it?</div>
+      <div style="padding: 16px 20px; border: 1px solid var(--border-mid); border-left: 2px solid rgba(158,28,46,0.4); font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--dim); line-height: 1.65;">To what extent can narrative analysis overstate the role of stories and understate the role of material conditions — economics, geography, military power — in shaping national identity?</div>
+      <div style="padding: 16px 20px; border: 1px solid var(--border-mid); border-left: 2px solid rgba(158,28,46,0.4); font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--dim); line-height: 1.65;">Are some national narratives more historically accurate than others — and if so, what does that mean for the claim that all national stories are constructions?</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer class="hub-footer">
+  <span class="footer-label">DSP Prague · Themenfeld 3 · Politics, Culture, Society: UK</span>
+  <span class="footer-label">justinsteinmetz.github.io</span>
+</footer>
+
+</body>
+</html>
